@@ -9,6 +9,8 @@
 const SUPABASE_URL = 'https://sioawkogfwbtbkotefph.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_LiRwFlodCNgFwj0pwcBvpg_dFV4Tm8N'
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE'
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -434,6 +436,35 @@ function renderFeed(){
   </div>`).join('')
 }
 
+
+async function callGemini(idx, userMsg){
+  const post = posts[idx]
+  const systemPrompt = `Чи HOLBOO.ai платформын AI худалдааны зөвлөх юм.
+Монгол хэлээр найрсаг байж яриарай.
+Хэрэглэгч "${post.txt}" гэж хайж байна.
+Бараа санал болгохдоо үнэ, нөхцөл, баталгааг хэл.
+"Таалагдаж байна уу? 😊" гэж л асуу — хэт ятгаж бүү зар.
+Байхгүй бараа бол "бид олж өгнө, түр хүлээгээрэй 🙂" гэж хэл.
+Дэлгүүр хаалттай үед "маргааш хүргэгдэнэ 🙂" гэж хэл.
+Хамтрахыг хүсвэл "+976 99999999 руу холбогдоорой" гэж хэл.`
+
+  try {
+    const res = await fetch(GEMINI_URL + '?key=' + GEMINI_API_KEY, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        contents: [{parts: [{text: systemPrompt + '\n\nХэрэглэгч: ' + userMsg}]}]
+      })
+    })
+    const data = await res.json()
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Уучлаарай, алдаа гарлаа 😔'
+    document.getElementById('typing')?.remove()
+    addAiMsg(idx, reply)
+  } catch(e) {
+    document.getElementById('typing')?.remove()
+    addAiMsg(idx, 'Уучлаарай, алдаа гарлаа 😔')
+  }
+}
 async function addPost(){
   const inp=document.getElementById('inp')
   const v=inp.value.trim()
@@ -546,11 +577,8 @@ function sendMsg(idx){
     t.innerHTML=`<div class="ai-av">✦</div><div class="typing"><span></span><span></span><span></span></div>`
     el.appendChild(t);el.scrollTop=9999
   }
-  setTimeout(()=>{
-    document.getElementById('typing')?.remove()
-    const r=['Ойлголоо! Дэлгэрэнгүй мэдээлэл авах уу?','Энэ бараа маш сайн нөхцөлтэй байна 😊','Үнийг бууруулж болох эсэхийг шалгая...','QPay-аар шууд төлж болно. Таалагдаж байна уу?','Бидэнтэй хамтрахыг хүсвэл холбоо барина уу 📞']
-    addAiMsg(idx,r[Math.floor(Math.random()*r.length)])
-  },1200)
+  // Gemini AI руу илгээх
+  callGemini(idx, v)
 }
 
 // ── DROPDOWN ──
