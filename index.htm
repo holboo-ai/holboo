@@ -637,7 +637,7 @@ async function loadPosts(){
     // Бусад хүмүүсийн постуудыг нэмэх
     data.forEach(p=>{
       if(!posts.find(existing=>existing.db_id===p.id)){
-        posts.push({txt:p.text,offers:p.offers||0,done:p.done||false,time:'Саяхан',img:'iphone',mine:false,saved:false,prods:[],msgs:[],db_id:p.id})
+        posts.push({txt:p.text,offers:p.offers||0,done:p.done||false,time:timeAgo(p.created_at),img:'iphone',mine:false,saved:false,prods:[],msgs:[],db_id:p.id})
       }
     })
     renderFeed()
@@ -649,11 +649,20 @@ async function startRealtime(){
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'posts'}, payload=>{
       const p = payload.new
       if(!posts.find(existing=>existing.db_id===p.id)){
-        posts.unshift({txt:p.text,offers:p.offers||0,done:p.done||false,time:'Саяхан',img:'iphone',mine:false,saved:false,prods:[],msgs:[],db_id:p.id})
+        posts.unshift({txt:p.text,offers:p.offers||0,done:p.done||false,time:timeAgo(p.created_at),img:'iphone',mine:false,saved:false,prods:[],msgs:[],db_id:p.id})
         if(activeTab==='post') renderFeed()
       }
     })
     .subscribe()
+}
+
+function timeAgo(dateStr){
+  if(!dateStr) return 'Саяхан'
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000)
+  if(diff < 60) return 'Саяхан'
+  if(diff < 3600) return Math.floor(diff/60) + ' мин өмнө'
+  if(diff < 86400) return Math.floor(diff/3600) + ' цаг өмнө'
+  return Math.floor(diff/86400) + ' өдөр өмнө'
 }
 function chkYt(){document.getElementById("btnYt").disabled=(document.getElementById("ytInp").value.trim().length<2)}
 function openAuth(type){isReg=(type==='reg');document.getElementById('authTitle').textContent=isReg?'Бүртгүүлэх':'Нэвтрэх';showStep('s1');document.getElementById('authOverlay').classList.add('open')}
