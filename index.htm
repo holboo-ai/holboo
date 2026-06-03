@@ -627,6 +627,18 @@ async function loadPosts(){
     renderFeed()
   }
 }
+
+async function startRealtime(){
+  sb.channel('posts')
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'posts'}, payload=>{
+      const p = payload.new
+      if(!posts.find(existing=>existing.db_id===p.id)){
+        posts.unshift({txt:p.text,offers:p.offers||0,done:p.done||false,time:'Саяхан',img:'iphone',mine:false,saved:false,prods:[],msgs:[],db_id:p.id})
+        if(activeTab==='post') renderFeed()
+      }
+    })
+    .subscribe()
+}
 function chkYt(){document.getElementById("btnYt").disabled=(document.getElementById("ytInp").value.trim().length<2)}
 function openAuth(type){isReg=(type==='reg');document.getElementById('authTitle').textContent=isReg?'Бүртгүүлэх':'Нэвтрэх';showStep('s1');document.getElementById('authOverlay').classList.add('open')}
 function showStep(id){document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
@@ -635,7 +647,7 @@ function goOtp(){document.getElementById('otpSub').textContent=`+976 ${document.
 function otpMov(inp,idx){inp.value=inp.value.replace(/\D/g,'');if(inp.value&&idx<3)document.getElementById('o'+(idx+1)).focus();document.getElementById('btnOtp').disabled=([0,1,2,3].map(i=>document.getElementById('o'+i).value).join('').length<4)}
 function otpKey(inp,idx,e){if(e.key==='Enter'){const f=[0,1,2,3].map(i=>document.getElementById('o'+i).value).join('');if(f.length===4)goYt()};if(e.key==='Backspace'&&!inp.value&&idx>0)document.getElementById('o'+(idx-1)).focus()}
 function goYt(){if(isReg)showStep('s3');else finishAuth()}
-function finishAuth(){document.getElementById('authOverlay').classList.remove('open');document.getElementById('pgLanding').classList.remove('active');document.getElementById('pgApp').classList.add('active');goTab('post');loadPosts()}
+function finishAuth(){document.getElementById('authOverlay').classList.remove('open');document.getElementById('pgLanding').classList.remove('active');document.getElementById('pgApp').classList.add('active');goTab('post');loadPosts();startRealtime()}
 </script>
 </body>
 </html>
