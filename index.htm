@@ -439,27 +439,15 @@ function renderFeed(){
 
 async function callGemini(idx, userMsg){
   const post = posts[idx]
-  const systemPrompt = `Чи HOLBOO.ai платформын AI худалдааны зөвлөх юм.
-Монгол хэлээр найрсаг байж яриарай.
-Хэрэглэгч "${post.txt}" гэж хайж байна.
-Бараа санал болгохдоо үнэ, нөхцөл, баталгааг хэл.
-"Таалагдаж байна уу? 😊" гэж л асуу — хэт ятгаж бүү зар.
-Байхгүй бараа бол "бид олж өгнө, түр хүлээгээрэй 🙂" гэж хэл.
-Дэлгүүр хаалттай үед "маргааш хүргэгдэнэ 🙂" гэж хэл.
-Хамтрахыг хүсвэл "+976 99999999 руу холбогдоорой" гэж хэл.`
-
   try {
-    const res = await fetch(GEMINI_URL, {
+    const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY},
-      body: JSON.stringify({
-        contents: [{parts: [{text: systemPrompt + '\n\nХэрэглэгч: ' + userMsg}]}]
-      })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: userMsg, postText: post.txt})
     })
     const data = await res.json()
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Уучлаарай, алдаа гарлаа 😔'
     document.getElementById('typing')?.remove()
-    addAiMsg(idx, reply)
+    addAiMsg(idx, data.reply)
   } catch(e) {
     document.getElementById('typing')?.remove()
     addAiMsg(idx, 'Уучлаарай, алдаа гарлаа 😔')
