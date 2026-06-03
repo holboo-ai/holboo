@@ -10,7 +10,7 @@ const SUPABASE_URL = 'https://sioawkogfwbtbkotefph.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_LiRwFlodCNgFwj0pwcBvpg_dFV4Tm8N'
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 const GEMINI_API_KEY = 'AQ.Ab8RN6LTIxlbVZTPFW1syKgREAmgc0BaIEpC7NawPZxCkYpX4A'
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -449,9 +449,9 @@ async function callGemini(idx, userMsg){
 Хамтрахыг хүсвэл "+976 99999999 руу холбогдоорой" гэж хэл.`
 
   try {
-    const res = await fetch(GEMINI_URL + '?key=' + GEMINI_API_KEY, {
+    const res = await fetch(GEMINI_URL, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY},
       body: JSON.stringify({
         contents: [{parts: [{text: systemPrompt + '\n\nХэрэглэгч: ' + userMsg}]}]
       })
