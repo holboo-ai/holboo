@@ -25,12 +25,12 @@ export default async function handler(req, res) {
   const GEMINI_KEY = 'AQ.Ab8RN6LvIvLTfuh-wF5xtTwHa27ZEYjUC1Tomh36AFpdp5cfbg'
 
   try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+    // AQ. key uses ?key= parameter format
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`
+    
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GEMINI_KEY}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: [{ role: 'user', parts: [{ text: message }] }],
@@ -39,9 +39,16 @@ export default async function handler(req, res) {
     })
 
     const data = await response.json()
+    
+    if (data.error) {
+      console.error('Gemini error:', data.error)
+      return res.status(200).json({ reply: 'Уучлаарай, алдаа гарлаа 😔' })
+    }
+
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Уучлаарай, алдаа гарлаа 😔'
     res.status(200).json({ reply })
   } catch (e) {
+    console.error(e)
     res.status(500).json({ reply: 'Уучлаарай, алдаа гарлаа 😔' })
   }
 }
