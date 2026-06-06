@@ -2,14 +2,19 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { message, postText } = req.body
+  const { message, postText } = req.body || {}
+
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ reply: 'OPENAI_API_KEY тохируулаагүй байна.' })
+  }
 
   const systemPrompt = `You are HOLBOO.ai's official AI Sales Assistant — Mongolia's first "Demand-First" AI shopping platform. Your mission: always help users find what they want, convince them to purchase, build trust, and communicate the unique value of HOLBOO.ai.
 
-The user is searching for: "${postText}"
+The user is searching for: "${postText || ''}"
 
 ## Core Principles:
 - NEVER say "No" or "We don't have it."
@@ -38,23 +43,30 @@ The user is searching for: "${postText}"
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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'
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
+          { role: 'user', content: message || '' }
         ],
         max_tokens: 400,
         temperature: 0.4
       })
     })
+
     const d = await r.json()
-    if (d.error) return res.status(200).json({ reply: 'Алдаа: ' + d.error.message })
+
+    if (!r.ok || d.error) {
+      return res.status(200).json({
+        reply: 'Алдаа: ' + (d.error?.message || 'OpenAI API алдаа гарлаа')
+      })
+    }
+
     const reply = d.choices?.[0]?.message?.content || 'Алдаа гарлаа'
-    res.status(200).json({ reply })
-  } catch(e) {
-    res.status(500).json({ reply: 'Алдаа гарлаа' })
+    return res.status(200).json({ reply })
+  } catch (e) {
+    return res.status(500).json({ reply: 'Сервер дээр алдаа гарлаа.' })
   }
 }
