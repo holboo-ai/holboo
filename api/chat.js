@@ -38,7 +38,7 @@ The user is searching for: "${postText}"
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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'
+        'Authorization': 'Bearer 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'
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
