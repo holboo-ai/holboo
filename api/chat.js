@@ -8,27 +8,38 @@ export default async function handler(req, res) {
 
   const { message, postText } = req.body
 
-  const systemPrompt = `Чи HOLBOO.ai платформын AI худалдааны зөвлөх юм. Монгол хэлээр найрсаг байж яриарай. Хэрэглэгч "${postText}" гэж хайж байна. Бараа санал болгохдоо үнэ, нөхцөл, баталгааг хэл. "Таалагдаж байна уу? 😊" гэж л асуу — хэт ятгаж бүү зар. Байхгүй бараа бол "бид олж өгнө, түр хүлээгээрэй 🙂" гэж хэл. Дэлгүүр хаалттай үед "маргааш хүргэгдэнэ 🙂" гэж хэл. Хамтрахыг хүсвэл "+976 99999999 руу холбогдоорой" гэж хэл.`
+  const systemPrompt = `Чи бол Монголын анхны demand-first AI худалдааны платформ болох HOLBOO.ai-ийн мэргэшсэн борлуулалтын зөвлөх.
+
+Үндсэн үүрэг:
+1. Хэрэглэгчийн хүссэн бүх зүйлийг (электроник, машин, байр, гар урлал, YouTuber merch гм) олоход нь туслах.
+2. "Үгүй" эсвэл "Байхгүй" гэж хэзээ ч битгий хэл. Хэрэв бараа системд байхгүй бол: "Бид танд заавал олж өгнө. Би сая таны хүсэлтийг админ болон нийлүүлэгчид рүү 'Яаралтай' төлөвтэйгөөр дамжууллаа. Бид 1-3 хоногийн дотор танд хамгийн сайн хувилбарыг олж мэдэгдэх болно" гэж хариулж, холбоо барих дугаарыг нь асууж ав.
+3. Барааг идэвхтэй зарж борлуул. "Шинэ мэт", "Баталгаатай", "Хамгийн хямд" гэх мэт давуу талыг нь онцолж, хэрэглэгчийг худалдан авалт руу хөтөл.
+4. Монгол YouTuber-үүд болон дотоодын үйлдвэрлэгчдийг маш сайн мэддэг, тэдний бүтээгдэхүүнийг дэмжиж сурталчилдаг байх.
+5. Хэрэглэгч нэг бараа асуухад түүнтэй ойролцоо үнэтэй болон ижил төстэй 2-3 сонголтыг жагсаалтаар харуулж, харьцуулахад нь тусал.
+
+Харилцааны өнгө аяс:
+Найрсаг, залуулаг, мэргэжлийн Монгол хэлээр харилцана. Хэрэглэгчийг "Та" гэж хүндэтгэнэ.
+
+Хэрэглэгч "${postText}" хайж байна.`
+
+  const GEMINI_KEY = 'AQ.Ab8RN6LvIvLTfuh-wF5xtTwHa27ZEYjUC1Tomh36AFpdp5cfbg'
 
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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'
+        'Authorization': `Bearer ${GEMINI_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ],
-        max_tokens: 300
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: 'user', parts: [{ text: message }] }],
+        generationConfig: { maxOutputTokens: 300, temperature: 0.4 }
       })
     })
 
     const data = await response.json()
-    const reply = data.choices?.[0]?.message?.content || 'Уучлаарай, алдаа гарлаа 😔'
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Уучлаарай, алдаа гарлаа 😔'
     res.status(200).json({ reply })
   } catch (e) {
     res.status(500).json({ reply: 'Уучлаарай, алдаа гарлаа 😔' })
