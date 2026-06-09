@@ -310,22 +310,15 @@
 
     <!-- БҮРТГҮҮЛЭХ: YouTuber -->
     <div class="mstep" id="step2b">
-      <div style="text-align:center;margin-bottom:20px">
-        <div style="display:inline-flex;align-items:center;gap:8px;background:#ff0000;padding:8px 16px;border-radius:10px;margin-bottom:16px">
-          <svg width="24" height="17" viewBox="0 0 24 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M23.5 2.5S23.2.8 22.5.1C21.5-.9 20.4-.9 19.9-.8 16.6 0 12 0 12 0S7.4 0 4.1-.8C3.6-.9 2.5-.9 1.5.1.8.8.5 2.5.5 2.5S.2 4.5.2 6.5v1.9c0 2 .3 4 .3 4s.3 1.7 1 2.4c1 1 2.3.97 2.9 1.1C6.4 16 12 16 12 16s4.6 0 7.9-.1c.5-.1 1.6-.1 2.6-1.1.7-.7 1-2.4 1-2.4s.3-2 .3-4V6.5c0-2-.3-4-.3-4z" fill="white"/>
-            <path d="M9.5 11.5v-6l6.5 3-6.5 3z" fill="#ff0000"/>
-          </svg>
-          <span style="color:white;font-weight:700;font-size:15px;font-family:'Nunito',sans-serif">YouTube</span>
-        </div>
-        <h2 style="margin-bottom:8px">Хэний нөлөөгөөр энд ирэв? 😄</h2>
-        <p style="color:var(--text2);font-size:13px;line-height:1.5">YouTuber-ийн нэрийг <b style="color:var(--blue)">яг зөв</b> бичнэ үү<br>Жишээ нь: <span style="color:var(--purple)">Red Burger</span>, <span style="color:var(--purple)">OKI MMA</span></p>
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:40px;margin-bottom:12px">😄</div>
+        <h2 style="margin-bottom:10px">Хэний нөлөөгөөр энд ирэв?</h2>
+        <p style="color:var(--text2);font-size:13px;line-height:1.6">Таны сонголт тэр YouTuber-т <b style="color:var(--blue)">бодит орлого</b> болно<br>тэд танд талархана 🙏<br><span style="color:rgba(255,255,255,0.3);font-size:12px">YouTuber-ийн нэрийг яг зөв бичнэ үү</span></p>
       </div>
       <div class="ig">
-        <input type="text" id="ytInput" placeholder="YouTuber-ийн нэр..." oninput="updateYtBtn()" onkeydown="if(event.key==='Enter'&&!document.getElementById('ytBtn').disabled)goToPassword()" style="text-align:center;font-size:16px">
+        <input type="text" id="ytInput" placeholder="YouTuber-ийн нэр..." oninput="updateYtBtn()" onkeydown="if(event.key==='Enter'&&!document.getElementById('ytBtn').disabled)goToPassword()" style="text-align:center;font-size:16px;letter-spacing:0.3px">
       </div>
-      <button class="mbtn" id="ytBtn" onclick="goToPassword()" disabled>Үргэлжлүүлэх</button>
-      <div class="resend" style="margin-top:12px"><a onclick="skipYoutuber()">Алгасах →</a></div>
+      <button class="mbtn" id="ytBtn" onclick="goToPassword()" disabled>Үргэлжлүүлэх →</button>
     </div>
 
     <!-- БҮРТГҮҮЛЭХ: нууц үг үүсгэх -->
