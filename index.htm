@@ -79,8 +79,25 @@
   /* APP */
   #app{min-height:100vh;display:flex;flex-direction:column;}
   .hdr{position:sticky;top:0;z-index:50;background:rgba(8,12,24,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;}
-  .hdr-logo{font-size:24px;font-weight:800;letter-spacing:-.5px;font-family:'Nunito',sans-serif;position:absolute;left:50%;transform:translateX(-50%);}
+  .hdr-logo{font-size:22px;font-weight:800;letter-spacing:-.5px;font-family:'Nunito',sans-serif;position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:1px;}
+  .hdr-logo .w{color:#fff;}
   .hdr-logo .g{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .hdr-inf{display:inline-block;position:relative;width:28px;height:20px;vertical-align:middle;}
+  .hdr-inf svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 4px rgba(168,85,247,0.7));animation:iglow 3s ease-in-out infinite;}
+  .hdr-orbit{position:absolute;top:50%;left:50%;width:140%;height:190%;border-radius:50%;border:1px solid rgba(100,180,255,0.2);animation:spin 6s linear infinite;pointer-events:none;}
+  .hdr-orbit2{position:absolute;top:50%;left:50%;width:120%;height:160%;border-radius:50%;border:1px solid rgba(168,85,247,0.15);animation:spin 9s linear infinite reverse;pointer-events:none;}
+  .hdr-orbit3{position:absolute;top:50%;left:50%;width:105%;height:140%;border-radius:50%;border:1px solid rgba(255,100,200,0.1);animation:spin 11s linear infinite;pointer-events:none;}
+  /* dad */
+  .hdr-orbit::before{content:'';position:absolute;width:5px;height:5px;border-radius:50%;background:var(--blue);box-shadow:0 0 6px var(--blue);top:-2.5px;left:50%;transform:translateX(-50%);}
+  /* mom */
+  .hdr-orbit::after{content:'';position:absolute;width:5px;height:5px;border-radius:50%;background:var(--purple);box-shadow:0 0 6px var(--purple);bottom:-2.5px;left:50%;transform:translateX(-50%);}
+  /* son */
+  .hdr-orbit2::before{content:'';position:absolute;width:4px;height:4px;border-radius:50%;background:#00e5ff;box-shadow:0 0 5px #00e5ff;top:-2px;left:50%;transform:translateX(-50%);}
+  /* twin1 */
+  .hdr-orbit3::before{content:'';position:absolute;width:3px;height:3px;border-radius:50%;background:var(--pink);box-shadow:0 0 4px var(--pink);top:-1.5px;left:50%;transform:translateX(-50%);}
+  /* twin2 */
+  .hdr-orbit3::after{content:'';position:absolute;width:3px;height:3px;border-radius:50%;background:var(--pink);box-shadow:0 0 4px var(--pink);bottom:-1.5px;left:50%;transform:translateX(-50%);}
+  .hdr-logo .app{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
   .ibtn{width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:border-color .2s;}
   .ibtn:hover{border-color:var(--purple);}
 
@@ -221,7 +238,19 @@
 <div id="app" class="screen">
   <header class="hdr">
     <div class="ibtn" onclick="toggleSaved()">🔖</div>
-    <div class="hdr-logo">holb<span class="g">∞</span></div>
+    <div class="hdr-logo">
+      <span class="w">holb</span>
+      <span class="hdr-inf">
+        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00b4ff"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#c026d3"/></linearGradient></defs>
+          <path d="M50,25 C50,25 38,5 25,5 C11,5 2,14 2,25 C2,36 11,45 25,45 C38,45 50,25 50,25 C50,25 62,5 75,5 C89,5 98,14 98,25 C98,36 89,45 75,45 C62,45 50,25 50,25 Z" fill="none" stroke="url(#hg)" stroke-width="9" stroke-linecap="round"/>
+        </svg>
+        <div class="hdr-orbit"></div>
+        <div class="hdr-orbit2"></div>
+        <div class="hdr-orbit3"></div>
+      </span>
+      <span class="app">.app</span>
+    </div>
     <div class="ibtn" onclick="toggleProfile()">👤</div>
   </header>
 
