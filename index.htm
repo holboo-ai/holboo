@@ -479,7 +479,8 @@ function updateProf(){
 
 // POSTS
 async function loadPosts(){
-  const{data}=await sb.from('posts').select('*').order('created_at',{ascending:false})
+  const{data,error}=await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(50)
+  if(error){console.log('Posts error:',error);return}
   if(data){posts=data;renderFeed()}
 }
 function setupRT(){sb.channel('posts').on('postgres_changes',{event:'*',schema:'public',table:'posts'},()=>loadPosts()).subscribe()}
@@ -488,8 +489,12 @@ function renderFeed(){
   if(!posts.length){el.innerHTML='<div class="fempty"><div class="big">✨</div>Хүсэлт бичиж эхлээрэй</div>';return}
   const saved=JSON.parse(localStorage.getItem('hb_saved')||'[]');savedIds=new Set(saved)
   el.innerHTML=posts.map(p=>{
-    const isSv=savedIds.has(p.id),num=p.user_num?String(p.user_num).padStart(3,'0'):'???'
-    return`<div class="pitem${p.pinned?' pinned':''}"><div class="pavatar">${p.phone?p.phone.slice(-2):'?'}</div><div class="pbody"><div class="pmeta"><span class="pnum">#${num}</span><span class="ptime">${timeAgo(p.created_at)}</span>${p.pinned?'<span class="ppin">📌 Pinned</span>':''}</div><div class="ptxt">${esc(p.text)}</div><div class="pacts"><button class="pact" onclick="openChat('${p.id}','${ea(p.text)}')">💬 AI зөвлөх</button><button class="pact${isSv?' sv':''}" onclick="toggleSv('${p.id}',this)">${isSv?'🔖 Хадгалсан':'🔖 Хадгалах'}</button><button class="pact" onclick="openDD(event,'${p.id}')">• • •</button></div></div></div>`
+    const isSv=savedIds.has(p.id)
+    const num=p.user_num?String(p.user_num).padStart(3,'0'):'???'
+    const ph=p.phone||p.user_id||'??'
+    const initials=ph.length>=2?ph.slice(-2):'?'
+    const timeStr=p.created_at?timeAgo(p.created_at):'Саяхан'
+    return`<div class="pitem${p.pinned?' pinned':''}"><div class="pavatar">${initials}</div><div class="pbody"><div class="pmeta"><span class="pnum">#${num}</span><span class="ptime">${timeStr}</span>${p.pinned?'<span class="ppin">📌 Pinned</span>':''}</div><div class="ptxt">${esc(p.text)}</div><div class="pacts"><button class="pact" onclick="openChat('${p.id}','${ea(p.text)}')">💬 AI зөвлөх</button><button class="pact${isSv?' sv':''}" onclick="toggleSv('${p.id}',this)">${isSv?'🔖 Хадгалсан':'🔖 Хадгалах'}</button><button class="pact" onclick="openDD(event,'${p.id}')">• • •</button></div></div></div>`
   }).join('')
 }
 async function submitPost(){
