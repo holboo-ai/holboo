@@ -13,17 +13,16 @@ export default async function handler(req, res) {
   // Supabase-аас бараа хайх
   let productsContext = ''
   try {
-    const searchTerm = (postText || message || '').substring(0, 50)
-    const r = await fetch(`${SB_URL}/rest/v1/products?or=(name.ilike.*${encodeURIComponent(searchTerm)}*,description.ilike.*${encodeURIComponent(searchTerm)}*,category.ilike.*${encodeURIComponent(searchTerm)}*)&select=name,price,condition,warranty,delivery&limit=5`, {
+    const r = await fetch(`${SB_URL}/rest/v1/products?select=name,price,condition,warranty,delivery,category&limit=20`, {
       headers: {
         'apikey': SB_KEY,
         'Authorization': `Bearer ${SB_KEY}`
       }
     })
     const products = await r.json()
-    if (products && products.length > 0) {
-      productsContext = '\n\nОдоо байгаа бараанууд:\n' + products.map((p, i) =>
-        `${i+1}. ${p.name} — ₮${(p.price||0).toLocaleString()}, ${p.condition||''}, баталгаа: ${p.warranty||'байхгүй'}, хүргэлт: ${p.delivery||'тодорхойгүй'}`
+    if (Array.isArray(products) && products.length > 0) {
+      productsContext = '\n\nМанайд байгаа бараанууд:\n' + products.map((p, i) =>
+        `${i+1}. ${p.name} — ₮${(p.price||0).toLocaleString()}, ${p.condition||'Шинэ'}, баталгаа: ${p.warranty||'байхгүй'}, хүргэлт: ${p.delivery||'өдрийн дотор'}`
       ).join('\n')
     }
   } catch(e) {
