@@ -404,6 +404,14 @@ function doLogin(){
     document.getElementById('adminApp').style.display='block'
     loadDash()
     loadPrompt()
+  // 30 секунд тутамд автоматаар шинэчлэх
+  setInterval(()=>{
+    const activePg=document.querySelector('.pg.active')?.id
+    if(activePg==='pg-dashboard')loadDash()
+    else if(activePg==='pg-posts')loadPosts()
+    else if(activePg==='pg-orders')loadOrders()
+    else if(activePg==='pg-complaints')loadComps()
+  },30000)
   } else {
     const e=document.getElementById('lErr');e.style.display='block'
     setTimeout(()=>e.style.display='none',2000)
