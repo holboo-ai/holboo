@@ -119,13 +119,14 @@
   .pitem{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;transition:background .15s;cursor:pointer;}
   .pitem:last-child{border-bottom:none;}
   .pitem:hover{background:rgba(255,255,255,.03);}
-  .pitem.pinned{background:rgba(168,85,247,.05);}
+  .pitem.pinned{background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(0,180,255,.08));border-left:3px solid var(--purple);position:relative;overflow:hidden;}
+  .pitem.pinned::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);}
   .pavatar{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;}
   .pbody{flex:1;min-width:0;}
   .pmeta{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
   .pnum{font-size:12px;font-weight:700;color:var(--blue);}
   .ptime{font-size:11px;color:var(--text2);}
-  .ppin{font-size:10px;padding:2px 7px;background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.3);border-radius:20px;color:var(--purple);}
+  .ppin{font-size:10px;padding:2px 8px;background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(0,180,255,.2));border:1px solid rgba(168,85,247,.5);border-radius:20px;color:#fff;font-weight:700;}
   .ptxt{font-size:14px;line-height:1.5;color:var(--text);}
   .pacts{display:flex;align-items:center;gap:12px;margin-top:8px;}
   .pact{background:none;border:none;font-size:12px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;padding:0;transition:color .2s;}
@@ -531,7 +532,7 @@ function updateProf(){
 
 // POSTS
 async function loadPosts(){
-  const{data,error}=await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(50)
+  const{data,error}=await sb.from('posts').select('*').order('pinned',{ascending:false,nullsFirst:false}).order('created_at',{ascending:false}).limit(50)
   if(error){console.log('Posts error:',error);return}
   if(data){posts=data;renderFeed()}
 }
