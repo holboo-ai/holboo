@@ -427,16 +427,18 @@ function showPg(id,el){
 
 // DASHBOARD
 async function loadDash(){
-  const[p,pr,o,s]=await Promise.all([
-    sb.from('posts').select('id',{count:'exact'}),
-    sb.from('products').select('id',{count:'exact'}),
-    sb.from('orders').select('id',{count:'exact'}).catch(()=>({count:0,data:[]})),
-    sb.from('sellers').select('id',{count:'exact'}).catch(()=>({count:0,data:[]}))
-  ])
-  document.getElementById('stPosts').textContent=p.count||p.data?.length||0
-  document.getElementById('stProds').textContent=pr.count||pr.data?.length||0
-  document.getElementById('stOrds').textContent=o.count||o.data?.length||0
-  document.getElementById('stSels').textContent=s.count||s.data?.length||0
+  try{
+    const[p,pr,o,s]=await Promise.all([
+      sb.from('posts').select('id',{count:'exact'}),
+      sb.from('products').select('id',{count:'exact'}),
+      sb.from('orders').select('id',{count:'exact'}),
+      sb.from('sellers').select('id',{count:'exact'})
+    ])
+    document.getElementById('stPosts').textContent=p.count||0
+    document.getElementById('stProds').textContent=pr.count||0
+    document.getElementById('stOrds').textContent=o.count||0
+    document.getElementById('stSels').textContent=s.count||0
+  }catch(e){console.log('Dash error:',e)}
 
   // Recent posts
   const{data:recent}=await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(8)
@@ -454,7 +456,7 @@ async function drawCharts(){
     days.push(`${d.getMonth()+1}/${d.getDate()}`)
     const start=new Date(d);start.setHours(0,0,0,0)
     const end=new Date(d);end.setHours(23,59,59,999)
-    const{count}=await sb.from('orders').select('*',{count:'exact',head:true}).gte('created_at',start.toISOString()).lte('created_at',end.toISOString()).catch(()=>({count:0}))
+    const{count}=await sb.from('orders').select('*',{count:'exact',head:true}).gte('created_at',start.toISOString()).lte('created_at',end.toISOString())
     counts.push(count||0)
   }
   if(ordersChart)ordersChart.destroy()
@@ -466,7 +468,7 @@ async function drawCharts(){
   })
 
   // YouTuber chart
-  const{data:yts}=await sb.from('youtubers').select('name,users_count').catch(()=>({data:[]}))
+  const{data:yts}=await sb.from('youtubers').select('name,users_count')
   if(ytChart)ytChart.destroy()
   const ctx2=document.getElementById('chartYT').getContext('2d')
   const ytData=yts?.length?yts:[{name:'Мэдэгдээгүй',users_count:1}]
@@ -499,7 +501,7 @@ async function addPin(){
 
 // ORDERS
 async function loadOrders(){
-  const{data}=await sb.from('orders').select('*').order('created_at',{ascending:false}).catch(()=>({data:[]}))
+  const{data}=await sb.from('orders').select('*').order('created_at',{ascending:false})
   const d=data||[]
   const rev=d.filter(o=>o.status==='done').reduce((s,o)=>s+(o.product_price||0),0)
   document.getElementById('ordAll').textContent=d.length
@@ -519,7 +521,7 @@ function exportOrders(){
 
 // COMPLAINTS
 async function loadComps(){
-  const{data}=await sb.from('complaints').select('*').order('created_at',{ascending:false}).catch(()=>({data:[]}))
+  const{data}=await sb.from('complaints').select('*').order('created_at',{ascending:false})
   const d=data||[]
   document.getElementById('compCnt').textContent=d.length?d.length+' гомдол':''
   document.getElementById('compList').innerHTML=d.length?d.map(c=>`<tr><td><span class="badge br">${esc(c.reason||'?')}</span></td><td style="font-size:12px;max-width:180px">${esc(c.note||'—')}</td><td><span class="badge bb">${c.reporter_phone||'?'}</span></td><td style="color:var(--text2);font-size:12px">${tAgo(c.created_at)}</td><td><button class="bsm bsm-g" onclick="resolveComp('${c.id}')">✓ Шийдэх</button></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Гомдол байхгүй 🎉</td></tr>'
@@ -555,7 +557,7 @@ async function delProd(id){if(!confirm('Устгах уу?'))return;await sb.fro
 
 // SELLERS
 async function loadSellers(){
-  const{data}=await sb.from('sellers').select('*').order('created_at',{ascending:false}).catch(()=>({data:[]}))
+  const{data}=await sb.from('sellers').select('*').order('created_at',{ascending:false})
   const d=data||[]
   document.getElementById('selList').innerHTML=d.length?d.map(s=>`<tr><td><b>${esc(s.name||'?')}</b></td><td><span class="badge bb">${s.phone}</span></td><td id="sc_${s.id}"><span style="color:var(--text2)">...</span></td><td><button class="bsm bsm-b" onclick="resetSelPw('${s.id}','${esc(s.name)}','${s.phone}')">🔑 Reset</button></td><td><button class="bsm bsm-r" onclick="delSel('${s.id}')">🗑</button></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Seller байхгүй</td></tr>'
   d.forEach(async s=>{
@@ -603,7 +605,7 @@ async function confirmMod(){
 
 // YOUTUBERS
 async function loadYT(){
-  const{data}=await sb.from('youtubers').select('*').order('users_count',{ascending:false}).catch(()=>({data:[]}))
+  const{data}=await sb.from('youtubers').select('*').order('users_count',{ascending:false})
   const d=data||[]
   document.getElementById('ytList').innerHTML=d.length?d.map(y=>`<tr><td><b>${esc(y.name)}</b></td><td><span class="badge bp">${y.commission_rate||10}%</span></td><td><span class="badge bb">${y.users_count||0} хэрэглэгч</span></td><td style="color:var(--green)">₮${(y.total_commission||0).toLocaleString()}</td><td><button class="bsm bsm-r" onclick="delYT('${y.id}')">🗑</button></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">YouTuber байхгүй</td></tr>'
 }
