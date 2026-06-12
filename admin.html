@@ -428,15 +428,15 @@ function showPg(id,el){
 // DASHBOARD
 async function loadDash(){
   const[p,pr,o,s]=await Promise.all([
-    sb.from('posts').select('*',{count:'exact',head:true}),
-    sb.from('products').select('*',{count:'exact',head:true}),
-    sb.from('orders').select('*',{count:'exact',head:true}).catch(()=>({count:0})),
-    sb.from('sellers').select('*',{count:'exact',head:true}).catch(()=>({count:0}))
+    sb.from('posts').select('id',{count:'exact'}),
+    sb.from('products').select('id',{count:'exact'}),
+    sb.from('orders').select('id',{count:'exact'}).catch(()=>({count:0,data:[]})),
+    sb.from('sellers').select('id',{count:'exact'}).catch(()=>({count:0,data:[]}))
   ])
-  document.getElementById('stPosts').textContent=p.count||0
-  document.getElementById('stProds').textContent=pr.count||0
-  document.getElementById('stOrds').textContent=o.count||0
-  document.getElementById('stSels').textContent=s.count||0
+  document.getElementById('stPosts').textContent=p.count||p.data?.length||0
+  document.getElementById('stProds').textContent=pr.count||pr.data?.length||0
+  document.getElementById('stOrds').textContent=o.count||o.data?.length||0
+  document.getElementById('stSels').textContent=s.count||s.data?.length||0
 
   // Recent posts
   const{data:recent}=await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(8)
