@@ -3,487 +3,583 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HOLBOO.ai — Seller</title>
+<title>HOLBOO Seller</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script>
-const SUPABASE_URL = 'https://sioawkogfwbtbkotefph.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_LiRwFlodCNgFwj0pwcBvpg_dFV4Tm8N'
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-</script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:#0f0f13;color:#e0e0f0}
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+:root{--bg:#080c18;--bg2:#0d1225;--bg3:#131929;--border:rgba(255,255,255,0.08);--text:#fff;--text2:rgba(255,255,255,0.55);--blue:#00b4ff;--purple:#a855f7;--pink:#c026d3;--green:#22c55e;--red:#f87171;--yellow:#fbbf24;--grad:linear-gradient(135deg,#00b4ff,#a855f7,#c026d3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* LOGIN */
-.login-wrap{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#0a0814;padding:24px}
-.login-box{width:100%;max-width:360px;background:#13102a;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:32px 28px}
-.login-logo{font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
-.login-logo span{color:#7c6ff7}
-.login-sub{font-size:13px;color:rgba(255,255,255,.3);text-align:center;margin-bottom:6px}
-.login-note{font-size:12px;color:rgba(124,111,247,.7);text-align:center;margin-bottom:24px;background:rgba(124,111,247,.08);border-radius:8px;padding:8px}
-.login-label{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:6px;display:block}
-.login-inp{width:100%;padding:11px 14px;border-radius:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:14px;outline:none;font-family:inherit;margin-bottom:14px}
-.login-inp:focus{border-color:#7c6ff7}
-.login-inp::placeholder{color:rgba(255,255,255,.25)}
-.login-btn{width:100%;padding:13px;border-radius:12px;background:#7c6ff7;color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer}
-.login-btn:hover{background:#6a5ee0}
-.login-err{font-size:12px;color:#f87171;text-align:center;margin-top:10px;display:none}
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.lbox{background:var(--bg2);border:1px solid var(--border);border-radius:24px;padding:40px;width:100%;max-width:380px;text-align:center;}
+.llogo{font-family:'Nunito',sans-serif;font-size:28px;font-weight:800;margin-bottom:4px;}
+.llogo .g{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.lsub{color:var(--text2);font-size:13px;margin-bottom:28px;}
+.lin{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-size:15px;font-family:'Inter',sans-serif;outline:none;margin-bottom:12px;transition:border-color .2s;}
+.lin:focus{border-color:var(--purple);}
+.lin::placeholder{color:rgba(255,255,255,.25);}
+.lbtn{width:100%;padding:14px;background:var(--grad);border:none;border-radius:50px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.lerr{color:var(--red);font-size:13px;margin-top:8px;display:none;}
 
-/* LAYOUT */
-.layout{display:none;height:100vh;flex-direction:column}
-.layout.active{display:flex}
-
-/* TOPBAR */
-.topbar{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:#0d0b1e;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
-.logo{font-size:15px;font-weight:700;color:#fff}
-.logo span{color:#7c6ff7}
-.seller-name{font-size:13px;color:rgba(255,255,255,.4)}
-.logout-btn{font-size:12px;color:#f87171;background:none;border:none;cursor:pointer}
+/* APP */
+#sellerApp{display:none;min-height:100vh;}
+.shdr{background:rgba(8,12,24,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.shdr-logo{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;}
+.shdr-logo .g{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.shdr-r{display:flex;align-items:center;gap:10px;}
+.seller-name{font-size:13px;color:var(--text2);}
+.ibtn{padding:7px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;color:var(--text);font-family:'Inter',sans-serif;transition:all .2s;}
+.ibtn:hover{border-color:var(--purple);}
+.ibtn.red{color:var(--red);border-color:rgba(248,113,113,.3);}
 
 /* TABS */
-.tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.07);background:#0d0b1e;flex-shrink:0}
-.tab{flex:1;padding:13px;text-align:center;font-size:13px;color:rgba(255,255,255,.4);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;font-family:inherit}
-.tab.active{color:#7c6ff7;border-bottom-color:#7c6ff7}
+.stabs{display:flex;gap:6px;padding:14px 20px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.stabs::-webkit-scrollbar{display:none;}
+.stab{padding:8px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:50px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;transition:all .2s;}
+.stab.active{background:var(--grad);border-color:transparent;color:#fff;}
 
 /* CONTENT */
-.content{flex:1;overflow-y:auto;padding:16px}
-.content::-webkit-scrollbar{width:3px}
-.pg{display:none}.pg.active{display:block}
+.scontent{padding:20px;max-width:900px;margin:0 auto;}
+.spg{display:none;}
+.spg.active{display:block;}
+.sptitle{font-size:20px;font-weight:700;margin-bottom:18px;font-family:'Nunito',sans-serif;}
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-.stat{background:#13102a;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px}
-.stat-label{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:6px}
-.stat-val{font-size:22px;font-weight:700;color:#fff}
-.stat-sub{font-size:11px;color:#22c55e;margin-top:3px}
+/* CARDS */
+.scards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.scard-l{font-size:12px;color:var(--text2);margin-bottom:6px;}
+.scard-v{font-size:24px;font-weight:700;font-family:'Nunito',sans-serif;}
 
-/* ADD PRODUCT FORM */
-.form-card{background:#13102a;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px;margin-bottom:14px}
-.form-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:16px}
-.img-upload{width:100%;height:120px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:6px;margin-bottom:14px;position:relative;overflow:hidden;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.15);transition:border .15s}
-.img-upload:hover{border-color:#7c6ff7}
-.img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.img-upload-txt{font-size:13px;color:rgba(255,255,255,.3);text-align:center}
-.img-preview{width:100%;height:100%;object-fit:cover;border-radius:11px;display:none}
-.imgs-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.img-thumb{width:70px;height:70px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,.1)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.form-field{margin-bottom:12px}
-.form-label{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:5px;display:block}
-.form-inp{width:100%;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;outline:none;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#fff;transition:border .15s}
-.form-inp:focus{border-color:#7c6ff7}
-.form-inp::placeholder{color:rgba(255,255,255,.2)}
-textarea.form-inp{resize:none;height:80px}
-select.form-inp option{background:#13102a}
-.submit-btn{width:100%;padding:13px;border-radius:12px;background:#7c6ff7;color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
-.submit-btn:hover{background:#6a5ee0}
+/* FORM */
+.sform{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;}
+.sform h3{font-size:15px;font-weight:600;margin-bottom:16px;}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px;}
+.fg{display:flex;flex-direction:column;gap:6px;}
+.fg label{font-size:12px;color:var(--text2);}
+.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--purple);}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.25);}
+.fg select option{background:var(--bg3);}
+.fg textarea{resize:none;height:72px;}
+.fbtns{display:flex;gap:10px;flex-wrap:wrap;}
+.fbtn{padding:11px 22px;background:var(--grad);border:none;border-radius:50px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.fbtn-o{padding:11px 22px;background:transparent;border:1px solid var(--border);border-radius:50px;color:var(--text);font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;}
 
-/* PRODUCT LIST */
-.prod-list{display:flex;flex-direction:column;gap:10px}
-.prod-item{background:#13102a;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center}
-.prod-img{width:54px;height:54px;border-radius:9px;object-fit:cover;background:rgba(255,255,255,.07);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
-.prod-img img{width:100%;height:100%;object-fit:cover;border-radius:9px}
-.prod-info{flex:1;min-width:0}
-.prod-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prod-price{font-size:14px;font-weight:700;color:#7c6ff7;margin-top:2px}
-.prod-tags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
-.tag{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
-.tag-g{background:rgba(34,197,94,.1);color:#22c55e}
-.tag-y{background:rgba(245,158,11,.1);color:#f59e0b}
-.prod-right{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
-.edit-btn{font-size:11px;padding:4px 10px;border-radius:8px;background:rgba(124,111,247,.15);color:#a89ff7;border:none;cursor:pointer}
-.del-btn{font-size:11px;padding:4px 10px;border-radius:8px;background:rgba(248,113,113,.1);color:#f87171;border:none;cursor:pointer}
+/* EXCEL UPLOAD */
+.excel-box{background:var(--bg2);border:1px dashed rgba(168,85,247,.4);border-radius:16px;padding:24px;text-align:center;margin-bottom:20px;cursor:pointer;transition:all .2s;}
+.excel-box:hover{border-color:var(--purple);background:rgba(168,85,247,.05);}
+.excel-box input{display:none;}
+.excel-icon{font-size:36px;margin-bottom:8px;}
+.excel-text{font-size:14px;color:var(--text2);}
+.excel-text b{color:var(--purple);}
 
-/* ORDERS */
-.order-item{background:#13102a;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:10px}
-.order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.order-prod{font-size:13px;font-weight:600;color:#fff}
-.order-price{font-size:14px;font-weight:700;color:#7c6ff7}
-.order-meta{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:8px}
-.order-buyer{font-size:12px;color:rgba(255,255,255,.5)}
-.badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
-.badge-g{background:rgba(34,197,94,.12);color:#22c55e}
-.badge-y{background:rgba(245,158,11,.12);color:#f59e0b}
-.badge-p{background:rgba(124,111,247,.15);color:#a89ff7}
+/* TABLE */
+.stw{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.stw-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.stw-h h3{font-size:15px;font-weight:600;}
+table{width:100%;border-collapse:collapse;}
+th{padding:11px 14px;font-size:12px;color:var(--text2);text-align:left;border-bottom:1px solid var(--border);font-weight:500;}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.bg{background:rgba(34,197,94,.15);color:var(--green);}
+.br{background:rgba(248,113,113,.15);color:var(--red);}
+.by{background:rgba(251,191,36,.15);color:var(--yellow);}
+.bb{background:rgba(0,180,255,.15);color:var(--blue);}
+.bp{background:rgba(168,85,247,.15);color:var(--purple);}
+.bsm{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;}
+.bsm-r{background:rgba(248,113,113,.2);color:var(--red);border:1px solid rgba(248,113,113,.3);}
+.bsm-b{background:rgba(0,180,255,.2);color:var(--blue);border:1px solid rgba(0,180,255,.3);}
+.bsm-g{background:rgba(34,197,94,.2);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+.bgr{background:var(--grad);color:#fff;padding:8px 16px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;}
 
-/* EMPTY */
-.empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.2)}
-.empty span{font-size:36px;display:block;margin-bottom:10px}
+/* NOTIFICATION */
+.notif{position:fixed;top:70px;right:20px;background:var(--bg2);border:1px solid var(--purple);border-radius:14px;padding:14px 18px;font-size:14px;transform:translateX(120%);transition:transform .3s;z-index:200;max-width:280px;}
+.notif.show{transform:translateX(0);}
+.notif-title{font-weight:700;color:var(--purple);margin-bottom:4px;}
+
+/* PASSWORD CHANGE */
+.pw-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:400px;}
+.pw-box h3{font-size:15px;font-weight:600;margin-bottom:16px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);border-radius:50px;padding:11px 22px;font-size:14px;transition:transform .3s;z-index:300;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){.scontent{padding:14px;}.fgrid{grid-template-columns:1fr;}.scards{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="login-wrap" id="loginWrap">
-  <div class="login-box">
-    <div class="login-logo">HOLBOO<span>.ai</span></div>
-    <div class="login-sub">Seller хэсэг</div>
-    <div class="login-note">⚠️ Зөвхөн HOLBOO-тэй гэрээ байгуулсан дэлгүүрүүд нэвтэрнэ</div>
-    <label class="login-label">Утасны дугаар</label>
-    <input class="login-inp" id="loginPhone" type="tel" placeholder="+976 8888 8888">
-    <label class="login-label">Нууц үг</label>
-    <input class="login-inp" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="login-btn" onclick="doLogin()">Нэвтрэх</button>
-    <div class="login-err" id="loginErr">Утасны дугаар эсвэл нууц үг буруу байна.<br>Гэрээ байгуулаагүй бол нэвтрэх боломжгүй.</div>
+<div id="loginPage">
+  <div class="lbox">
+    <div class="llogo">holb<span class="g">∞</span></div>
+    <div class="lsub">Seller хэсэг</div>
+    <input type="tel" class="lin" id="lPhone" placeholder="Утасны дугаар" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" class="lin" id="lPw" placeholder="Нууц үг" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="lbtn" onclick="doLogin()">Нэвтрэх</button>
+    <div class="lerr" id="lErr">Утас эсвэл нууц үг буруу</div>
   </div>
 </div>
 
-<!-- MAIN -->
-<div class="layout" id="layout">
-  <div class="topbar">
-    <div class="logo">HOLBOO<span>.ai</span> <span style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400">/ Seller</span></div>
-    <div style="display:flex;align-items:center;gap:14px">
-      <div class="seller-name" id="sellerName">iStore Mongolia</div>
-      <button class="logout-btn" onclick="doLogout()">Гарах</button>
+<div id="sellerApp">
+  <header class="shdr">
+    <div class="shdr-logo">holb<span class="g">∞</span> <span style="font-size:13px;color:var(--text2);font-weight:400">Seller</span></div>
+    <div class="shdr-r">
+      <span class="seller-name" id="sellerNameHdr"></span>
+      <button class="ibtn red" onclick="doLogout()">Гарах</button>
     </div>
+  </header>
+
+  <div class="stabs">
+    <div class="stab active" onclick="showSpg('dashboard',this)">📊 Нүүр</div>
+    <div class="stab" onclick="showSpg('addproduct',this)">➕ Бараа нэмэх</div>
+    <div class="stab" onclick="showSpg('products',this)">📦 Бараанууд</div>
+    <div class="stab" onclick="showSpg('orders',this)">💰 Захиалгууд</div>
+    <div class="stab" onclick="showSpg('report',this)">📈 Тайлан</div>
+    <div class="stab" onclick="showSpg('settings',this)">⚙️ Тохиргоо</div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="goTab('dashboard',this)">📊 Нүүр</button>
-    <button class="tab" onclick="goTab('add',this)">➕ Бараа нэмэх</button>
-    <button class="tab" onclick="goTab('products',this)">📦 Бараанууд</button>
-    <button class="tab" onclick="goTab('orders',this)">🛍️ Захиалга</button>
-  </div>
-
-  <div class="content">
+  <div class="scontent">
 
     <!-- DASHBOARD -->
-    <div class="pg active" id="pg-dashboard">
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">Нийт бараа</div>
-          <div class="stat-val" id="totalProds">0</div>
-          <div class="stat-sub">Идэвхтэй</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Зарагдсан</div>
-          <div class="stat-val" id="totalOrders">0</div>
-          <div class="stat-sub">Энэ сар</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Орлого</div>
-          <div class="stat-val" id="totalRevenue">₮0</div>
-          <div class="stat-sub">Энэ сар</div>
-        </div>
+    <div class="spg active" id="spg-dashboard">
+      <div class="sptitle">📊 Нүүр</div>
+      <div class="scards">
+        <div class="scard"><div class="scard-l">Нийт бараа</div><div class="scard-v" style="color:var(--blue)" id="sTotalProds">—</div></div>
+        <div class="scard"><div class="scard-l">Нийт захиалга</div><div class="scard-v" style="color:var(--green)" id="sTotalOrds">—</div></div>
+        <div class="scard"><div class="scard-l">Нийт орлого</div><div class="scard-v" style="color:var(--purple)" id="sTotalRev">—</div></div>
+        <div class="scard"><div class="scard-l">Өнөөдрийн орлого</div><div class="scard-v" style="color:var(--yellow)" id="sTodayRev">—</div></div>
       </div>
-
-      <div style="background:#13102a;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px;margin-bottom:14px">
-        <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:12px">Сүүлийн захиалгууд</div>
-        <div id="recentOrders" style="display:flex;flex-direction:column;gap:8px">
-          <div style="font-size:12px;color:rgba(255,255,255,.3);text-align:center;padding:20px">Захиалга байхгүй байна</div>
-        </div>
-      </div>
-
-      <div style="background:rgba(124,111,247,.08);border:1px solid rgba(124,111,247,.2);border-radius:12px;padding:14px">
-        <div style="font-size:13px;color:#a89ff7;font-weight:600;margin-bottom:4px">💡 Санамж</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.6">Бараа бүрт тодорхой зураг, үнэ, үзүүлэлт оруулна уу. AI таны мэдээллийг ашиглан хэрэглэгчтэй тохирох match хийнэ.</div>
+      <div class="stw">
+        <div class="stw-h"><h3>🕐 Сүүлийн захиалгууд</h3></div>
+        <table><thead><tr><th>Бараа</th><th>Үнэ</th><th>Худалдан авагч</th><th>Статус</th><th>Цаг</th></tr></thead>
+        <tbody id="dashOrders"></tbody></table>
       </div>
     </div>
 
     <!-- ADD PRODUCT -->
-    <div class="pg" id="pg-add">
-      <div class="form-card">
-        <div class="form-title">Шинэ бараа нэмэх</div>
+    <div class="spg" id="spg-addproduct">
+      <div class="sptitle">➕ Бараа нэмэх</div>
 
-        <div class="form-field">
-          <label class="form-label">Барааны зураг (до 5 зураг)</label>
-          <div class="img-upload" id="imgUpload">
-            <input type="file" accept="image/*" multiple onchange="prevImgs(this)">
-            <div class="img-upload-txt">📷 Зураг оруулах<br><span style="font-size:11px;opacity:.5">JPG, PNG — хамгийн ихдээ 5 зураг</span></div>
-          </div>
-          <div class="imgs-row" id="imgsRow"></div>
-        </div>
+      <!-- Excel upload -->
+      <div class="excel-box" onclick="document.getElementById('excelFile').click()">
+        <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" onchange="handleExcel(this)">
+        <div class="excel-icon">📊</div>
+        <div class="excel-text">Excel файлаар олон бараа нэмэх<br><b>Дарж файл сонгох</b></div>
+      </div>
 
-        <div class="form-field">
-          <label class="form-label">Барааны нэр</label>
-          <input class="form-inp" id="pName" type="text" placeholder="жш: iPhone 13 Pro 128GB Midnight">
-        </div>
+      <div style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:16px">— эсвэл гараар нэмэх —</div>
 
-        <div class="form-row">
-          <div class="form-field" style="margin:0">
-            <label class="form-label">Үнэ (₮)</label>
-            <input class="form-inp" id="pPrice" type="number" placeholder="1,200,000">
-          </div>
-          <div class="form-field" style="margin:0">
-            <label class="form-label">Үлдэгдэл (ширхэг)</label>
-            <input class="form-inp" id="pStock" type="number" placeholder="1">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field" style="margin:0">
-            <label class="form-label">Нөхцөл</label>
-            <select class="form-inp" id="pCond">
-              <option>Шинэ</option>
-              <option>Шинэ мэт</option>
-              <option>Хэрэглэсэн</option>
+      <div class="sform">
+        <h3>Бараа нэмэх</h3>
+        <div class="fgrid">
+          <div class="fg"><label>Барааны нэр *</label><input type="text" id="pName" placeholder="iPhone 13 Pro 128GB"></div>
+          <div class="fg"><label>Үнэ (₮) *</label><input type="number" id="pPrice" placeholder="1200000"></div>
+          <div class="fg">
+            <label>Нөхцөл</label>
+            <select id="pCond">
+              <option value="Шинэ">Шинэ</option>
+              <option value="Шинэ мэт">Шинэ мэт</option>
+              <option value="Хэрэглэсэн">Хэрэглэсэн</option>
             </select>
           </div>
-          <div class="form-field" style="margin:0">
-            <label class="form-label">Баталгаа</label>
-            <select class="form-inp" id="pWar">
-              <option>Байхгүй</option>
-              <option>1 сар</option>
-              <option>3 сар</option>
-              <option>6 сар</option>
-              <option>1 жил</option>
+          <div class="fg"><label>Баталгаа</label><input type="text" id="pWarr" placeholder="6 сар / 1 жил / Байхгүй"></div>
+          <div class="fg">
+            <label>Хүргэлт</label>
+            <select id="pDel">
+              <option value="Өдрийн дотор">Өдрийн дотор</option>
+              <option value="Маргааш">Маргааш</option>
+              <option value="2-3 хоног">2-3 хоног</option>
+              <option value="Байхгүй">Байхгүй</option>
             </select>
           </div>
+          <div class="fg"><label>Категори</label><input type="text" id="pCat" placeholder="Утас / Laptop / Гэр ахуй..."></div>
         </div>
-
-        <div class="form-row">
-          <div class="form-field" style="margin:0">
-            <label class="form-label">Категори</label>
-            <select class="form-inp" id="pCat">
-              <option>Утас</option>
-              <option>Компьютер</option>
-              <option>Таблет</option>
-              <option>Дуу чимээ</option>
-              <option>Камер</option>
-              <option>Гэр ахуй</option>
-              <option>Бусад</option>
-            </select>
-          </div>
-          <div class="form-field" style="margin:0">
-            <label class="form-label">Хүргэлт</label>
-            <select class="form-inp" id="pDel">
-              <option>Хүргэлттэй</option>
-              <option>Хүргэлтгүй</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Дэлгэрэнгүй мэдээлэл</label>
-          <textarea class="form-inp" id="pDesc" placeholder="жш: 128GB, Midnight өнгө, батарей 94%, Face ID, 5G дэмжинэ..."></textarea>
-        </div>
-
-        <button class="submit-btn" onclick="addProduct()">Бараа нэмэх ✓</button>
-        <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
-          <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:10px">📊 Excel-ээс бараа оруулах</div>
-          <div style="font-size:11px;color:#8b949e;margin-bottom:10px">Баганууд: Нэр, Үнэ, Нөхцөл, Баталгаа, Категори, Хүргэлт, Тайлбар</div>
-          <div id="excelUploadArea" style="width:100%;height:80px;border:1.5px dashed #30363d;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;background:#1e2330;transition:border .15s" onmouseover="this.style.borderColor='#1a56db'" onmouseout="this.style.borderColor='#30363d'">
-            <input type="file" accept=".xlsx,.xls,.csv" onchange="uploadExcel(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer">
-            <div style="text-align:center">
-              <div style="font-size:20px">📂</div>
-              <div style="font-size:12px;color:#6b7280;margin-top:4px">Excel/CSV файл чирж оруулах</div>
-            </div>
-          </div>
-          <div id="excelStatus" style="font-size:12px;color:#3fb950;margin-top:8px;display:none"></div>
+        <div class="fg" style="margin-bottom:14px"><label>Тайлбар</label><textarea id="pDesc" placeholder="Барааны дэлгэрэнгүй мэдээлэл..."></textarea></div>
+        <div class="fbtns">
+          <button class="fbtn" onclick="addProduct()">➕ Нэмэх</button>
+          <button class="fbtn-o" onclick="clearForm()">Цэвэрлэх</button>
         </div>
       </div>
     </div>
 
     <!-- PRODUCTS -->
-    <div class="pg" id="pg-products">
-      <div class="prod-list" id="prodList"></div>
+    <div class="spg" id="spg-products">
+      <div class="sptitle">📦 Бараанууд</div>
+      <div class="stw">
+        <div class="stw-h">
+          <h3>Миний бараанууд</h3>
+          <div style="display:flex;gap:8px">
+            <span id="prodCount" style="font-size:13px;color:var(--text2)"></span>
+            <button class="bgr" onclick="exportProducts()">📥 Excel татах</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Нэр</th><th>Үнэ</th><th>Нөхцөл</th><th>Хүргэлт</th><th>Цаг</th><th></th></tr></thead>
+        <tbody id="prodList"></tbody></table>
+      </div>
     </div>
 
     <!-- ORDERS -->
-    <div class="pg" id="pg-orders">
-      <div id="ordersList"><div class="empty"><span style="font-size:36px">🛍️</span><span>Захиалга байхгүй байна</span></div></div>
+    <div class="spg" id="spg-orders">
+      <div class="sptitle">💰 Захиалгууд</div>
+      <div class="stw">
+        <div class="stw-h">
+          <h3>Захиалгын жагсаалт</h3>
+          <button class="bgr" onclick="exportOrders()">📥 Excel татах</button>
+        </div>
+        <table><thead><tr><th>Бараа</th><th>Үнэ</th><th>Худалдан авагч</th><th>Статус</th><th>Цаг</th><th></th></tr></thead>
+        <tbody id="ordList"></tbody></table>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="spg" id="spg-report">
+      <div class="sptitle">📈 Тайлан</div>
+      <div class="scards">
+        <div class="scard"><div class="scard-l">Энэ сарын орлого</div><div class="scard-v" style="color:var(--green)" id="rMonthRev">—</div></div>
+        <div class="scard"><div class="scard-l">HOLBOO комисс (5%)</div><div class="scard-v" style="color:var(--red)" id="rComm">—</div></div>
+        <div class="scard"><div class="scard-l">Цэвэр орлого</div><div class="scard-v" style="color:var(--purple)" id="rNet">—</div></div>
+        <div class="scard"><div class="scard-l">Нийт захиалга</div><div class="scard-v" style="color:var(--blue)" id="rOrds">—</div></div>
+      </div>
+      <div class="stw">
+        <div class="stw-h">
+          <h3>Сарын тайлан</h3>
+          <button class="bgr" onclick="exportReport()">📥 Excel татах</button>
+        </div>
+        <table><thead><tr><th>Бараа</th><th>Борлуулсан тоо</th><th>Нийт орлого</th><th>Комисс</th><th>Цэвэр орлого</th></tr></thead>
+        <tbody id="reportList"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="spg" id="spg-settings">
+      <div class="sptitle">⚙️ Тохиргоо</div>
+      <div class="pw-box">
+        <h3>🔑 Нууц үг солих</h3>
+        <div class="fg" style="margin-bottom:12px"><label>Одоогийн нууц үг</label><input type="password" id="oldPw" placeholder="••••••"></div>
+        <div class="fg" style="margin-bottom:12px"><label>Шинэ нууц үг</label><input type="password" id="newPw" placeholder="••••••"></div>
+        <div class="fg" style="margin-bottom:16px"><label>Давтах</label><input type="password" id="newPw2" placeholder="••••••"></div>
+        <button class="fbtn" onclick="changePw()">Хадгалах</button>
+      </div>
     </div>
 
   </div>
 </div>
 
+<!-- NEW ORDER NOTIFICATION -->
+<div class="notif" id="notif">
+  <div class="notif-title">🔔 Шинэ захиалга!</div>
+  <div id="notifText"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-// Sellers — зөвхөн гэрээтэй дэлгүүрүүд
-const sellers={
-  '99111111':{pass:'istore2026',name:'iStore Mongolia'},
-  '88223344':{pass:'tech2026',name:'Tech Store UB'},
-  '99334455':{pass:'gadget2026',name:'Gadget World'},
-}
+const SB_URL='https://sioawkogfwbtbkotefph.supabase.co'
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpb2F3a29nZndidGJrb3RlZnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NDIyMTQsImV4cCI6MjA5NjAxODIxNH0.uyhykWjnqLJOVmsPMlDDECmv03GECPm29FBvlgUBiM0'
+const sb=supabase.createClient(SB_URL,SB_KEY)
 
-let products=[]
+let sellerPhone=''
+let sellerData=null
 
-let currentSeller = ''
+// LOGIN
 async function doLogin(){
-  const phone=document.getElementById('loginPhone').value.replace(/\D/g,'').slice(-8)
-  const pass=document.getElementById('loginPass').value
-  const seller=sellers[phone]
-  if(seller&&seller.pass===pass){
-    currentSeller = phone
-    document.getElementById('loginErr').style.display='none'
-    document.getElementById('loginWrap').style.display='none'
-    document.getElementById('layout').classList.add('active')
-    document.getElementById('sellerName').textContent=seller.name
-    await loadProductsFromDB()
-  } else {
-    document.getElementById('loginErr').style.display='block'
+  const ph=document.getElementById('lPhone').value.trim()
+  const pw=document.getElementById('lPw').value.trim()
+  if(!ph||!pw){showToast('Бүгдийг бөглөнө үү');return}
+
+  const{data,error}=await sb.from('sellers').select('*').eq('phone',ph).eq('password',pw).single()
+  if(error||!data){
+    document.getElementById('lErr').style.display='block'
+    setTimeout(()=>document.getElementById('lErr').style.display='none',2000)
+    return
   }
+  sellerPhone=ph
+  sellerData=data
+  localStorage.setItem('hb_sel_session',JSON.stringify({phone:ph,name:data.name}))
+  document.getElementById('loginPage').style.display='none'
+  document.getElementById('sellerApp').style.display='block'
+  document.getElementById('sellerNameHdr').textContent=data.name
+  loadDash()
+  setupOrderNotif()
 }
 
-
-async function loadOrders(){
-  const {data,error} = await sb.from('orders').select('*').eq('seller_phone',currentSeller).order('created_at',{ascending:false})
-  if(!data) return
-  
-  // Update stats
-  const thisMonth = data.filter(o => new Date(o.created_at).getMonth() === new Date().getMonth())
-  document.getElementById('totalOrders').textContent = thisMonth.length
-  const revenue = thisMonth.reduce((sum,o) => sum + (o.product_price||0), 0)
-  document.getElementById('totalRevenue').textContent = '₮' + (revenue/1000000).toFixed(1) + 'М'
-  
-  // Recent orders in dashboard
-  const recent = data.slice(0,3)
-  document.getElementById('recentOrders').innerHTML = recent.length ? recent.map(o=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,.04);border-radius:10px">
-      <div>
-        <div style="font-size:13px;color:#fff">${o.product_name||'Бараа'}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px">${timeAgo(o.created_at)}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:13px;font-weight:700;color:#7c6ff7">₮${Number(o.product_price||0).toLocaleString()}</div>
-        <span class="badge ${o.status==='done'?'badge-g':'badge-y'}">${o.status==='done'?'Дууссан':'Хүлээгдэж байна'}</span>
-      </div>
-    </div>`).join('') : '<div style="font-size:12px;color:rgba(255,255,255,.3);text-align:center;padding:20px">Захиалга байхгүй байна</div>'
-  
-  // All orders tab
-  document.getElementById('ordersList').innerHTML = data.length ? data.map(o=>`
-    <div class="order-item">
-      <div class="order-top">
-        <div class="order-prod">${o.product_name||'Бараа'}</div>
-        <span class="badge ${o.status==='done'?'badge-g':'badge-y'}">${o.status==='done'?'Дууссан':'Хүлээгдэж байна'}</span>
-      </div>
-      <div class="order-meta">${timeAgo(o.created_at)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="order-buyer">Худалдан авагч: ${o.buyer_phone||'--'}</div>
-        <div style="font-size:15px;font-weight:700;color:#7c6ff7">₮${Number(o.product_price||0).toLocaleString()}</div>
-      </div>
-      <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.3)">Commission: ₮${Math.floor((o.product_price||0)*0.05).toLocaleString()} (5%) · Таны авах: ₮${Math.floor((o.product_price||0)*0.95).toLocaleString()}</div>
-    </div>`).join('') : '<div class="empty"><span style="font-size:36px">🛍️</span><span>Захиалга байхгүй байна</span></div>'
-}
-
-function timeAgo(dateStr){
-  if(!dateStr) return 'Саяхан'
-  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000)
-  if(diff < 60) return 'Саяхан'
-  if(diff < 3600) return Math.floor(diff/60) + ' мин өмнө'
-  if(diff < 86400) return Math.floor(diff/3600) + ' цаг өмнө'
-  return Math.floor(diff/86400) + ' өдөр өмнө'
-}
-async function loadProductsFromDB(){
-  const {data,error} = await sb.from('products').select('*').eq('seller_phone',currentSeller).order('created_at',{ascending:false})
-  if(data&&data.length){
-    products = data.map(p=>({
-      name:p.name,
-      price:Number(p.price).toLocaleString(),
-      cond:p.condition||'Шинэ',
-      war:p.warranty||'Байхгүй',
-      cat:p.category||'Бусад',
-      del:p.delivery||'Хүргэлттэй',
-      stock:p.stock||1,
-      desc:p.description||'',
-      db_id:p.id
-    }))
-    document.getElementById('totalProds').textContent=products.length
-    renderProducts()
-  }
-}
 function doLogout(){
-  document.getElementById('loginWrap').style.display='flex'
-  document.getElementById('layout').classList.remove('active')
-  document.getElementById('loginPhone').value=''
-  document.getElementById('loginPass').value=''
+  localStorage.removeItem('hb_sel_session')
+  sellerPhone=''
+  sellerData=null
+  document.getElementById('sellerApp').style.display='none'
+  document.getElementById('loginPage').style.display='flex'
+  document.getElementById('lPhone').value=''
+  document.getElementById('lPw').value=''
 }
 
-function goTab(id,btn){
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'))
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'))
-  document.getElementById('pg-'+id).classList.add('active')
-  btn.classList.add('active')
-}
-
-function prevImgs(inp){
-  const row=document.getElementById('imgsRow')
-  row.innerHTML=''
-  Array.from(inp.files).slice(0,5).forEach(f=>{
-    const r=new FileReader()
-    r.onload=e=>{
-      const img=document.createElement('img')
-      img.className='img-thumb'
-      img.src=e.target.result
-      row.appendChild(img)
+window.onload=async()=>{
+  const s=localStorage.getItem('hb_sel_session')
+  if(s){
+    const sess=JSON.parse(s)
+    const{data}=await sb.from('sellers').select('*').eq('phone',sess.phone).single()
+    if(data){
+      sellerPhone=sess.phone
+      sellerData=data
+      document.getElementById('loginPage').style.display='none'
+      document.getElementById('sellerApp').style.display='block'
+      document.getElementById('sellerNameHdr').textContent=data.name
+      loadDash()
+      setupOrderNotif()
     }
-    r.readAsDataURL(f)
-  })
+  }
 }
 
+// NAVIGATION
+function showSpg(id,el){
+  document.querySelectorAll('.spg').forEach(p=>p.classList.remove('active'))
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'))
+  document.getElementById('spg-'+id).classList.add('active')
+  el.classList.add('active')
+  if(id==='dashboard')loadDash()
+  else if(id==='products')loadProducts()
+  else if(id==='orders')loadOrders()
+  else if(id==='report')loadReport()
+}
+
+// DASHBOARD
+async function loadDash(){
+  const[prods,ords]=await Promise.all([
+    sb.from('products').select('id',{count:'exact'}).eq('seller_phone',sellerPhone),
+    sb.from('orders').select('*').eq('seller_phone',sellerPhone)
+  ])
+  const ordData=ords.data||[]
+  const doneOrds=ordData.filter(o=>o.status==='done')
+  const rev=doneOrds.reduce((s,o)=>s+(o.product_price||0),0)
+  const today=new Date().toDateString()
+  const todayRev=doneOrds.filter(o=>new Date(o.created_at).toDateString()===today).reduce((s,o)=>s+(o.product_price||0),0)
+
+  document.getElementById('sTotalProds').textContent=prods.count||0
+  document.getElementById('sTotalOrds').textContent=ordData.length
+  document.getElementById('sTotalRev').textContent='₮'+rev.toLocaleString()
+  document.getElementById('sTodayRev').textContent='₮'+todayRev.toLocaleString()
+
+  const recent=ordData.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,8)
+  document.getElementById('dashOrders').innerHTML=recent.length?recent.map(o=>`
+    <tr>
+      <td><b>${esc(o.product_name||'?')}</b></td>
+      <td style="color:var(--green)">₮${(o.product_price||0).toLocaleString()}</td>
+      <td><span class="badge bb">${o.buyer_phone||'?'}</span></td>
+      <td><span class="badge ${o.status==='done'?'bg':o.status==='cancelled'?'br':'by'}">${o.status==='done'?'Болсон':o.status==='cancelled'?'Цуцлагдсан':'Хүлээгдэж байна'}</span></td>
+      <td style="color:var(--text2);font-size:12px">${tAgo(o.created_at)}</td>
+      <td>${o.status==='pending'?`<button class="bsm bsm-g" onclick="confirmOrder('${o.id}')">✓ Баталгаажуулах</button>`:''}</td>
+    </tr>
+  `).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Захиалга байхгүй</td></tr>'
+}
+
+// ADD PRODUCT
 async function addProduct(){
   const name=document.getElementById('pName').value.trim()
   const price=document.getElementById('pPrice').value
-  if(!name||!price){alert('Нэр болон үнэ заавал бөглөнө!');return}
-  
-  // Supabase-д хадгалах
-  const {data,error} = await sb.from('products').insert([{
+  if(!name||!price){showToast('Нэр болон үнэ заавал оруулна уу');return}
+
+  const{error}=await sb.from('products').insert({
     name,
-    price: Number(price),
-    condition: document.getElementById('pCond').value,
-    warranty: document.getElementById('pWar').value,
-    category: document.getElementById('pCat').value,
-    delivery: document.getElementById('pDel').value,
-    stock: Number(document.getElementById('pStock').value||1),
-    description: document.getElementById('pDesc').value,
-    seller_phone: currentSeller
-  }]).select()
-  
-  if(error){alert('Алдаа гарлаа: '+error.message);return}
-  
-  products.unshift({
-    name,
-    price:Number(price).toLocaleString(),
-    cond:document.getElementById('pCond').value,
-    war:document.getElementById('pWar').value,
-    cat:document.getElementById('pCat').value,
-    del:document.getElementById('pDel').value,
-    stock:document.getElementById('pStock').value||1,
-    desc:document.getElementById('pDesc').value,
-    db_id:data?.[0]?.id
+    price:parseInt(price),
+    condition:document.getElementById('pCond').value,
+    warranty:document.getElementById('pWarr').value,
+    delivery:document.getElementById('pDel').value,
+    category:document.getElementById('pCat').value,
+    description:document.getElementById('pDesc').value,
+    seller_phone:sellerPhone
   })
-  document.getElementById('pName').value=''
-  document.getElementById('pPrice').value=''
-  document.getElementById('pStock').value=''
-  document.getElementById('pDesc').value=''
-  document.getElementById('imgsRow').innerHTML=''
-  document.getElementById('totalProds').textContent=products.length
-  renderProducts()
-  alert('Бараа амжилттай нэмэгдлээ! ✓')
-  goTab('products',document.querySelectorAll('.tab')[2])
+  if(error){showToast('Алдаа: '+error.message);return}
+  clearForm()
+  showToast('Бараа нэмэгдлээ ✓')
+}
+function clearForm(){
+  ;['pName','pPrice','pWarr','pCat','pDesc'].forEach(id=>document.getElementById(id).value='')
+  document.getElementById('pCond').value='Шинэ'
+  document.getElementById('pDel').value='Өдрийн дотор'
 }
 
-function renderProducts(){
-  document.getElementById('prodList').innerHTML=products.map((p,i)=>`
-  <div class="prod-item">
-    <div class="prod-img">📦</div>
-    <div class="prod-info">
-      <div class="prod-name">${p.name}</div>
-      <div class="prod-price">₮${p.price}</div>
-      <div class="prod-tags">
-        <span class="tag tag-g">${p.cond}</span>
-        <span class="tag">${p.cat}</span>
-        <span class="tag">${p.del}</span>
-        ${p.war!=='Байхгүй'?`<span class="tag tag-g">✓ ${p.war}</span>`:''}
-        <span class="tag">Үлдэгдэл: ${p.stock}</span>
-      </div>
-    </div>
-    <div class="prod-right">
-      <button class="edit-btn">Засах</button>
-      <button class="del-btn" onclick="delProd(${i})">Устгах</button>
-    </div>
-  </div>`).join('')
-}
+// EXCEL UPLOAD
+async function handleExcel(input){
+  const file=input.files[0]
+  if(!file)return
+  showToast('Excel уншиж байна...')
+  const reader=new FileReader()
+  reader.onload=async(e)=>{
+    const wb=XLSX.read(e.target.result,{type:'binary'})
+    const ws=wb.Sheets[wb.SheetNames[0]]
+    const rows=XLSX.utils.sheet_to_json(ws,{defval:''})
+    if(!rows.length){showToast('Мэдээлэл олдсонгүй');return}
 
-function delProd(i){
-  if(confirm('Энэ барааг устгах уу?')){
-    products.splice(i,1)
-    renderProducts()
-    document.getElementById('totalProds').textContent=products.length
+    let count=0
+    for(const row of rows){
+      const name=row['Нэр']||row['name']||row['барааны нэр']||row['Барааны нэр']||''
+      const price=parseInt(row['Үнэ']||row['price']||row['үнэ']||0)
+      if(!name||!price)continue
+      await sb.from('products').insert({
+        name:String(name),
+        price,
+        condition:String(row['Нөхцөл']||row['condition']||'Шинэ'),
+        warranty:String(row['Баталгаа']||row['warranty']||''),
+        delivery:String(row['Хүргэлт']||row['delivery']||'Өдрийн дотор'),
+        category:String(row['Категори']||row['category']||''),
+        description:String(row['Тайлбар']||row['description']||''),
+        seller_phone:sellerPhone
+      })
+      count++
+    }
+    showToast(count+' бараа нэмэгдлээ ✓')
+    input.value=''
   }
+  reader.readAsBinaryString(file)
 }
 
-renderProducts()
+// PRODUCTS
+async function loadProducts(){
+  const{data,count}=await sb.from('products').select('*',{count:'exact'}).eq('seller_phone',sellerPhone).order('created_at',{ascending:false})
+  document.getElementById('prodCount').textContent=(count||0)+' бараа'
+  document.getElementById('prodList').innerHTML=data?.length?data.map(p=>`
+    <tr>
+      <td><b>${esc(p.name||'?')}</b></td>
+      <td style="color:var(--green)">₮${(p.price||0).toLocaleString()}</td>
+      <td><span class="badge ${p.condition==='Шинэ'?'bg':'by'}">${p.condition||'?'}</span></td>
+      <td><span class="badge bb">${p.delivery||'?'}</span></td>
+      <td style="color:var(--text2);font-size:12px">${tAgo(p.created_at)}</td>
+      <td><button class="bsm bsm-r" onclick="delProd('${p.id}')">🗑</button></td>
+    </tr>
+  `).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Бараа байхгүй</td></tr>'
+}
+async function delProd(id){
+  if(!confirm('Устгах уу?'))return
+  await sb.from('products').delete().eq('id',id)
+  showToast('Устгагдлаа')
+  loadProducts()
+}
+function exportProducts(){
+  sb.from('products').select('*').eq('seller_phone',sellerPhone).then(({data})=>{
+    if(!data?.length){showToast('Бараа байхгүй');return}
+    const rows=[['Нэр','Үнэ','Нөхцөл','Баталгаа','Хүргэлт','Категори','Тайлбар']]
+    data.forEach(p=>rows.push([p.name,p.price,p.condition,p.warranty,p.delivery,p.category,p.description]))
+    dlCSV(rows,'products.csv')
+  })
+}
+
+// ORDERS
+async function loadOrders(){
+  const{data}=await sb.from('orders').select('*').eq('seller_phone',sellerPhone).order('created_at',{ascending:false})
+  document.getElementById('ordList').innerHTML=data?.length?data.map(o=>`
+    <tr>
+      <td><b>${esc(o.product_name||'?')}</b></td>
+      <td style="color:var(--green)">₮${(o.product_price||0).toLocaleString()}</td>
+      <td><span class="badge bb">${o.buyer_phone||'?'}</span></td>
+      <td><span class="badge ${o.status==='done'?'bg':o.status==='cancelled'?'br':'by'}">${o.status==='done'?'Болсон':o.status==='cancelled'?'Цуцлагдсан':'Хүлээгдэж байна'}</span></td>
+      <td style="color:var(--text2);font-size:12px">${tAgo(o.created_at)}</td>
+      <td>${o.status==='pending'?`<button class="bsm bsm-g" onclick="confirmOrder('${o.id}')">✓ Баталгаажуулах</button>`:''}</td>
+    </tr>
+  `).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Захиалга байхгүй</td></tr>'
+}
+async function confirmOrder(id){
+  await sb.from('orders').update({status:'done'}).eq('id',id)
+  showToast('Захиалга баталгаажлаа ✓')
+  loadOrders()
+}
+function exportOrders(){
+  sb.from('orders').select('*').eq('seller_phone',sellerPhone).then(({data})=>{
+    if(!data?.length){showToast('Захиалга байхгүй');return}
+    const rows=[['Бараа','Үнэ','Худалдан авагч','Статус','Огноо']]
+    data.forEach(o=>rows.push([o.product_name,o.product_price,o.buyer_phone,o.status,o.created_at]))
+    dlCSV(rows,'orders.csv')
+  })
+}
+
+// REPORT
+async function loadReport(){
+  const now=new Date()
+  const start=new Date(now.getFullYear(),now.getMonth(),1)
+  const{data}=await sb.from('orders').select('*').eq('seller_phone',sellerPhone).eq('status','done').gte('created_at',start.toISOString())
+  const d=data||[]
+  const rev=d.reduce((s,o)=>s+(o.product_price||0),0)
+  const comm=Math.round(rev*0.05)
+  const net=rev-comm
+
+  document.getElementById('rMonthRev').textContent='₮'+rev.toLocaleString()
+  document.getElementById('rComm').textContent='₮'+comm.toLocaleString()
+  document.getElementById('rNet').textContent='₮'+net.toLocaleString()
+  document.getElementById('rOrds').textContent=d.length
+
+  // Group by product
+  const byProd={}
+  d.forEach(o=>{
+    const k=o.product_name||'?'
+    if(!byProd[k])byProd[k]={name:k,count:0,rev:0}
+    byProd[k].count++
+    byProd[k].rev+=o.product_price||0
+  })
+  const items=Object.values(byProd).sort((a,b)=>b.rev-a.rev)
+  document.getElementById('reportList').innerHTML=items.length?items.map(i=>{
+    const c=Math.round(i.rev*0.05)
+    return`<tr><td><b>${esc(i.name)}</b></td><td>${i.count}</td><td style="color:var(--green)">₮${i.rev.toLocaleString()}</td><td style="color:var(--red)">₮${c.toLocaleString()}</td><td style="color:var(--purple)">₮${(i.rev-c).toLocaleString()}</td></tr>`
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Энэ сард борлуулалт байхгүй</td></tr>'
+}
+function exportReport(){
+  sb.from('orders').select('*').eq('seller_phone',sellerPhone).eq('status','done').then(({data})=>{
+    if(!data?.length){showToast('Мэдээлэл байхгүй');return}
+    const rows=[['Бараа','Үнэ','Худалдан авагч','Огноо','Комисс','Цэвэр орлого']]
+    data.forEach(o=>{
+      const comm=Math.round((o.product_price||0)*0.05)
+      rows.push([o.product_name,o.product_price,o.buyer_phone,o.created_at,comm,(o.product_price||0)-comm])
+    })
+    dlCSV(rows,'report.csv')
+  })
+}
+
+// SETTINGS
+async function changePw(){
+  const old=document.getElementById('oldPw').value
+  const nw=document.getElementById('newPw').value
+  const nw2=document.getElementById('newPw2').value
+  if(!old||!nw||!nw2){showToast('Бүгдийг бөглөнө үү');return}
+  if(nw!==nw2){showToast('Шинэ нууц үг таарахгүй байна');return}
+  if(old!==sellerData.password){showToast('Одоогийн нууц үг буруу');return}
+  const{error}=await sb.from('sellers').update({password:nw}).eq('phone',sellerPhone)
+  if(error){showToast('Алдаа гарлаа');return}
+  sellerData.password=nw
+  ;['oldPw','newPw','newPw2'].forEach(id=>document.getElementById(id).value='')
+  showToast('Нууц үг солигдлоо ✓')
+}
+
+// ORDER NOTIFICATION
+function setupOrderNotif(){
+  sb.channel('seller_orders_'+sellerPhone)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders',filter:`seller_phone=eq.${sellerPhone}`},
+    payload=>{
+      const o=payload.new
+      showNotif(`${o.product_name||'?'} — ₮${(o.product_price||0).toLocaleString()}`)
+      loadDash()
+    })
+    .subscribe()
+}
+function showNotif(text){
+  const n=document.getElementById('notif')
+  document.getElementById('notifText').textContent=text
+  n.classList.add('show')
+  setTimeout(()=>n.classList.remove('show'),5000)
+}
+
+// HELPERS
+function dlCSV(rows,filename){
+  const csv=rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n')
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'})
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click()
+}
+function tAgo(ts){if(!ts)return'';const d=(Date.now()-new Date(ts))/1000;if(d<60)return'Дөнгөж сая';if(d<3600)return Math.floor(d/60)+' мин өмнө';if(d<86400)return Math.floor(d/3600)+' цаг өмнө';return Math.floor(d/86400)+' өдрийн өмнө'}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 </script>
 </body>
 </html>
