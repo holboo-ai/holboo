@@ -1,72 +1,72 @@
+import { createClient } from '@supabase/supabase-js'
+
+const SB_URL = 'https://sioawkogfwbtbkotefph.supabase.co'
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpb2F3a29nZndidGJrb3RlZnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NDIyMTQsImV4cCI6MjA5NjAxODIxNH0.uyhykWjnqLJOVmsPMlDDECmv03GECPm29FBvlgUBiM0'
+const sb = createClient(SB_URL, SB_KEY)
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { message, postText } = req.body || {}
+  const { message, postText } = req.body
 
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ reply: 'OPENAI_API_KEY тохируулаагүй байна.' })
+  // Supabase-аас бараа хайх
+  let productsContext = ''
+  try {
+    const searchTerm = postText || message || ''
+    const { data: products } = await sb
+      .from('products')
+      .select('name, price, condition, warranty, delivery, description')
+      .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)
+      .limit(5)
+
+    if (products && products.length > 0) {
+      productsContext = '\n\nОдоо байгаа бараанууд:\n' + products.map((p, i) =>
+        `${i+1}. ${p.name} — ₮${p.price?.toLocaleString()}, ${p.condition}, баталгаа: ${p.warranty||'байхгүй'}, хүргэлт: ${p.delivery||'тодорхойгүй'}`
+      ).join('\n')
+    }
+  } catch(e) {
+    console.log('Product search error:', e)
   }
 
-  const systemPrompt = `You are HOLBOO.ai's official AI Sales Assistant — Mongolia's first "Demand-First" AI shopping platform. Your mission: always help users find what they want, convince them to purchase, build trust, and communicate the unique value of HOLBOO.ai.
+  const systemPrompt = `Та HOLBOO.ai платформын AI худалдааны зөвлөх юм. Зөвхөн монгол хэлээр хариул.
 
-The user is searching for: "${postText || ''}"
+ДҮРЭМ:
+- Давтан мэндлэхгүй, шууд бараа санал болго
+- Богино, тодорхой хариул (2-3 өгүүлбэр)
+- Үнэтэй бараа түрүүлж харуул (anchoring)
+- "Таалагдаж байна уу? 😊" гэж л асуу — хэзээ ч "Авах уу?" гэж битгий асуу
+- Бараа байхгүй бол: "Бид олж өгнө, түр хүлээгээрэй 🙂" гэж хэлээд ойролцоо бараа санал болго
+- Орой 18:00-аас хойш захиалга: "Маргааш хүргэгдэнэ 🙂"
+- Хамтрахыг хүсвэл: "+976 96091122 руу холбогдоорой"
+- Хэрэглэгч эргэлзвэл давуу талыг нь тайлбарла
 
-## Core Principles:
-- NEVER say "No" or "We don't have it."
-- If item is not in stock: "Яг одоо манай бэлэн бараанууд дунд байхгүй байгаа ч HOLBOO.ai танд заавал олж өгөх болно. Би сая таны хүсэлтийг манай нийлүүлэгчдийн сүлжээ болон Админ руу 'Яаралтай' төлөвтэйгөөр дамжууллаа. Бид 1-3 хоногийн дотор хамгийн сайн хувилбарыг олж мэдэгдэх болно." Then ask for contact phone number.
-
-## Sales Tactics:
-- Present 2-3 options with clear advantages for each
-- Use persuasive terms: "шинэ мэт," "оригинал," "баталгаатай"
-- If user asks for discount: "Манай бараанууд баталгаатай, шалгагдсан байдаг тул эрсдэлгүй. Гадуур баталгаагүй газраас хямд аваад засуулах зардал гарахаас сэргийлж бид танд хамгийн найдвартайг нь санал болгож байна."
-
-## Scope:
-- Electronics, phones, laptops, accessories
-- Cars, real estate (anything can be sourced)
-- Mongolian craft products: "Монгол хүний ур ухаан шингэсэн"
-- Mongolian YouTuber merch (Gants-Erdene/Ganaa etc.)
-
-## Style:
-- Friendly, youthful, professional Mongolian
-- Always greet the user
-- Always end with: "Танд өөр туслах зүйл байна уу?"
-- Short paragraphs (3-5 sentences)
-- Never use bullet points in responses`
+Хэрэглэгч хайж байгаа зүйл: "${postText}"${productsContext}`
 
   try {
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer ${process.env.OPENAI_KEY}`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: message || '' }
+          { role: 'user', content: message }
         ],
-        max_tokens: 400,
-        temperature: 0.4
+        max_tokens: 300,
+        temperature: 0.5
       })
     })
-
     const d = await r.json()
-
-    if (!r.ok || d.error) {
-      return res.status(200).json({
-        reply: 'Алдаа: ' + (d.error?.message || 'OpenAI API алдаа гарлаа')
-      })
-    }
-
     const reply = d.choices?.[0]?.message?.content || 'Алдаа гарлаа'
-    return res.status(200).json({ reply })
-  } catch (e) {
-    return res.status(500).json({ reply: 'Сервер дээр алдаа гарлаа.' })
+    res.status(200).json({ reply })
+  } catch(e) {
+    res.status(200).json({ reply: 'Холболт алдаа гарлаа 😔' })
   }
 }
